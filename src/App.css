@@ -3,6 +3,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: sans-serif;
 }
 
 html, body {
@@ -11,37 +12,35 @@ html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
-  background-color: #070F2B;
-  color: #9290C3;
+  background-color: #476ca3;
+  color: #EBF5FB;
 }
 
 /* App.css */
+
 .App {
   text-align: center;
   min-height: 100vh;
-  background-color: #070F2B;
+  background-color: #EBF5FB;
 }
 
 .App-header {
-  background-color: #1B1A55;
+  background-color: #EBF5FB;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 1vmin);
-  color: #9290C3;
+  color: #476ca3;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
   width: 300px;
-  background-color: #1B1A55;
   padding: 20px;
-  border-radius: 8px;
   margin-bottom: 20px;
-  border: 1px solid #535C91;
 }
 
 .form-group {
@@ -53,20 +52,27 @@ html, body {
 
 .form-group label {
   margin-bottom: 5px;
-  color: #9290C3;
+  color: #476ca3;
 }
 
 .form-group input {
   padding: 10px;
-  border: none;
+  border: solid blue;
   border-radius: 4px;
   font-size: 16px;
-  background-color: #535C91;
   color: #ffffff;
 }
 
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #535C91;
+    border-radius: 4px;
+    color: #9290C3;
+}
+
 .submit-btn {
-  background-color: #535C91;
+  background-color: #476ca3;
   color: white;
   padding: 12px;
   border: none;
@@ -77,18 +83,18 @@ html, body {
 }
 
 .submit-btn:hover {
-  background-color: #9290C3;
+  background-color: #476ca3;
 }
 
 .toggle-form {
   margin-top: 10px;
-  color: #9290C3;
+  color: #476ca3;
 }
 
 .toggle-btn {
   background: none;
   border: none;
-  color: #9290C3;
+  color: #476ca3;
   cursor: pointer;
   font-size: 16px;
   padding: 0 5px;
@@ -96,11 +102,21 @@ html, body {
 }
 
 .logout-btn {
-  background-color: #535C91;
+  background-color: #407089;
   color: white;
   padding: 10px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.logout-btn:hover {
+  background-color: #5BA0C5;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 15px;
   cursor: pointer;
   font-size: 16px;
 }
@@ -121,7 +137,7 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #070F2B;
+  background-color: #F5F7FA;
 }
 
 .app-nav {
@@ -129,9 +145,9 @@ html, body {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background-color: #1B1A55;
-  color: #9290C3;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  background-color: #F5F7FA;
+  color: #32586C;
+  box-shadow: 0 2px 4px rgba(125, 129, 151, 0.3);
 }
 
 .user-info {
@@ -143,13 +159,13 @@ html, body {
 .user-info h3 {
   margin: 0;
   font-size: 1.2rem;
-  color: #9290C3;
+  color: #32586C;
 }
 
 .user-info p {
   margin: 5px 0 0 0;
-  font-size: 0.9rem;
-  color: #9290C3;
+  font-size: 1rem;
+  color: #5BA0C5;
 }
 
 .app-content {

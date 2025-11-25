@@ -790,15 +790,6 @@ const Calendar = ({ userId }) => {
       )}
 
       <div className="calendar-header">
-        <div className="calendar-title">
-          <h2>{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
-        </div>
-        <div className="calendar-nav">
-          <button onClick={goToPreviousMonth}>&lt;</button>
-          <button onClick={goToToday}>Dnes</button>
-          <button onClick={goToNextMonth}>&gt;</button>
-          <button onClick={handleAddEvent} className="add-event-btn">+ Udalosť</button>
-        </div>
         <div className="view-selector">
           <button
             className={currentView === 'day' ? 'active' : ''}
@@ -819,6 +810,20 @@ const Calendar = ({ userId }) => {
             Mesiac
           </button>
         </div>
+        <div className="calendar-group">
+          <div className="calendar-title">
+            <h2>{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
+          </div>
+          <div className="calendar-nav">
+            <div className="nav-group">
+              <button onClick={goToPreviousMonth}>&lt;</button>
+              <button onClick={goToToday}>Dnes</button>
+              <button onClick={goToNextMonth}>&gt;</button>
+            </div>
+            <button onClick={handleAddEvent} className="add-event-btn">+ Udalosť</button>
+          </div>
+        </div>
+        
       </div>
 
       {/* Add legend for event colors */}
