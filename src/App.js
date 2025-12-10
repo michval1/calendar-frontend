@@ -3,6 +3,8 @@ import './App.css';
 import { auth, loginWithEmailAndPassword, registerWithEmailAndPassword, logoutUser, getUserId } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Calendar from './Calendar';
+import NotificationCenter from './NotificationCenter';
+import AdminPanel from './AdminPanel';
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,12 +15,25 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin
+  const checkIfAdmin = (userEmail) => {
+    return userEmail === 'admin@admin.admin';
+  };
 
   // Sledovať stav autentifikácie
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       console.log("Auth state changed:", currentUser);
       setUser(currentUser);
+      
+      // Check if user is admin
+      if (currentUser) {
+        setIsAdmin(checkIfAdmin(currentUser.email));
+      } else {
+        setIsAdmin(false);
+      }
       
       // Get userId directly from localStorage
       const storedUserId = localStorage.getItem('userId');
@@ -80,6 +95,8 @@ function App() {
         if (result.error) {
           setError(result.error);
         } else if (result.user) {
+          // Check if admin
+          setIsAdmin(checkIfAdmin(result.user.email));
           // Get userId directly after login
           const localUserId = localStorage.getItem('userId');
           console.log("After login, userId from localStorage:", localUserId);
@@ -91,6 +108,8 @@ function App() {
         if (result.error) {
           setError(result.error);
         } else if (result.user) {
+          // Check if admin
+          setIsAdmin(checkIfAdmin(result.user.email));
           // Get userId directly after registration
           const localUserId = localStorage.getItem('userId');
           console.log("After registration, userId from localStorage:", localUserId);
@@ -109,6 +128,7 @@ function App() {
     } else {
       // Clear userId on logout
       setUserId(null);
+      setIsAdmin(false);
     }
   };
 
@@ -125,19 +145,27 @@ function App() {
   if (user) {
     return (
       <div className="App">
+        {/* Notification Center - shows notifications and test button (only for non-admin) */}
+        {!isAdmin && userId && <NotificationCenter userId={userId} />}
+        
         <div className="app-container">
           <nav className="app-nav">
             <div className="user-info">
-              <h3>Osobný kalendár</h3>
+              <h3>{isAdmin ? 'Admin Panel' : 'Osobný kalendár'}</h3>
               <p>{user.displayName || user.email}</p>
               <p>ID: {userId}</p>
+              {isAdmin && <p style={{color: '#FF5252', fontWeight: 'bold'}}>👑 Administrator</p>}
             </div>
             <button onClick={handleLogout} className="logout-btn">Odhlásiť sa</button>
           </nav>
           
           <main className="app-content">
-            {/* Pass userId directly, not through a function call */}
-            <Calendar userId={userId} />
+            {/* Show AdminPanel for admin, Calendar for regular users */}
+            {isAdmin ? (
+              <AdminPanel userId={userId} />
+            ) : (
+              <Calendar userId={userId} />
+            )}
           </main>
           
           {error && (
@@ -214,5 +242,3 @@ function App() {
 }
 
 export default App;
-
-// jojfs

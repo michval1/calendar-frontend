@@ -3,12 +3,9 @@ import './Calendar.css';
 import EventForm from './EventForm';
 import {
   createEvent,
-  getAllUserEvents,
+  getAllEvents,
   updateEvent,
   deleteEvent,
-  getAllEventsInRange,
-  shareEvent,
-  removeSharedUser,
   getPriorityColor
 } from './EventService';
 
@@ -117,9 +114,10 @@ const Calendar = ({ userId }) => {
       startDate.setDate(startDate.getDate() - 7);
       endDate.setDate(endDate.getDate() + 7);
 
-      // Get all events (own and shared)
-      const eventsData = await getAllUserEvents(idToUse);
-      // Here you would ideally use getAllEventsInRange(userId, startDate, endDate)
+      // Get all events (owned and shared) using the new simplified API
+      const response = await getAllEvents(idToUse, startDate, endDate);
+      // Combine owned and shared events into one array
+      const eventsData = [...response.ownedEvents, ...response.sharedEvents];
 
       // Process recurring events
       const expandedEvents = processRecurringEvents(eventsData, startDate, endDate);
@@ -238,13 +236,13 @@ const Calendar = ({ userId }) => {
   };
 
   const getMonthName = (month) => {
-    const monthNames = ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún',
-      'Júl', 'August', 'September', 'Október', 'November', 'December'];
+    const monthNames = ['JanuÃ¡r', 'FebruÃ¡r', 'Marec', 'AprÃ­l', 'MÃ¡j', 'JÃºn',
+      'JÃºl', 'August', 'September', 'OktÃ³ber', 'November', 'December'];
     return monthNames[month];
   };
 
   const getDayName = (day) => {
-    const dayNames = ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'];
+    const dayNames = ['NedeÄ¾a', 'Pondelok', 'Utorok', 'Streda', 'Å tvrtok', 'Piatok', 'Sobota'];
     return dayNames[day];
   };
 
@@ -264,7 +262,7 @@ const Calendar = ({ userId }) => {
   // Event handling functions
   const handleAddEvent = () => {
     if (!userId && !numericUserId) {
-      alert("Pred vytvorením udalosti sa musíte prihlásiť.");
+      alert("Pred vytvorenÃ­m udalosti sa musÃ­te prihlÃ¡siÅ¥.");
       return;
     }
 
@@ -286,7 +284,8 @@ const Calendar = ({ userId }) => {
 
       // Only delete from database if it's not a recurrence instance
       if (!event.isRecurrenceInstance) {
-        await deleteEvent(eventId);
+        const idToUse = userId ? parseInt(userId, 10) : numericUserId;
+        await deleteEvent(eventId, idToUse);
       }
 
       // Refresh events
@@ -309,13 +308,13 @@ const Calendar = ({ userId }) => {
       // Make sure we have a userId before proceeding
       const idToUse = userId ? parseInt(userId, 10) : numericUserId;
       if (!idToUse) {
-        alert("Pred vytvorením udalosti sa musíte prihlásiť.");
+        alert("Pred vytvorenÃ­m udalosti sa musÃ­te prihlÃ¡siÅ¥.");
         return;
       }
 
       if (eventData.id) {
-        // Update existing event
-        await updateEvent(eventData.id, eventData);
+        // Update existing event - now passing userId for authorization
+        await updateEvent(eventData.id, eventData, idToUse);
       } else {
         // Create new event - make sure userId is passed as a number
         await createEvent(eventData, idToUse);
@@ -326,7 +325,7 @@ const Calendar = ({ userId }) => {
       setShowEventForm(false);
     } catch (error) {
       console.error('Failed to save event:', error);
-      alert(`Chyba pri ukladaní udalosti: ${error.message}`);
+      alert(`Chyba pri ukladanÃ­ udalosti: ${error.message}`);
     }
   };
 
@@ -454,7 +453,7 @@ const Calendar = ({ userId }) => {
     let dayGrid = [];
 
     // Add weekday headers
-    const weekDays = ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'];
+    const weekDays = ['Po', 'Ut', 'St', 'Å t', 'Pi', 'So', 'Ne'];
     const headerRow = weekDays.map((day, index) => (
       <div key={`header-${index}`} className="calendar-day-header">{day}</div>
     ));
@@ -544,13 +543,13 @@ const Calendar = ({ userId }) => {
 
   // Helper function to get permission label
   const getPermissionLabel = (event) => {
-    if (isEventOwner(event)) return 'Vlastník';
+    if (isEventOwner(event)) return 'VlastnÃ­k';
 
     const permission = event.userPermissions?.[numericUserId] || 'VIEW';
     switch (permission) {
-      case 'EDIT': return 'Úpravy';
-      case 'ADMIN': return 'Administrátor';
-      default: return 'Len na čítanie';
+      case 'EDIT': return 'Ãšpravy';
+      case 'ADMIN': return 'AdministrÃ¡tor';
+      default: return 'Len na ÄÃ­tanie';
     }
   };
   // Week view rendering
@@ -603,7 +602,7 @@ const Calendar = ({ userId }) => {
                   style={{ backgroundColor: eventColor }}
                 >
                   <div className="event-time">
-                    {event.isAllDay ? 'Celý deň' :
+                    {event.isAllDay ? 'CelÃ½ deÅˆ' :
                       `${new Date(event.startTime).getHours()}:${String(new Date(event.startTime).getMinutes()).padStart(2, '0')}`}
                   </div>
                   <div className="event-title">{event.title}</div>
@@ -656,7 +655,7 @@ const Calendar = ({ userId }) => {
                   style={{ backgroundColor: eventColor }}
                 >
                   <div className="event-title">
-                    {event.isAllDay ? '(Celý deň) ' : ''}
+                    {event.isAllDay ? '(CelÃ½ deÅˆ) ' : ''}
                     {event.title}
                   </div>
                   {!event.isAllDay && (
@@ -693,23 +692,23 @@ const Calendar = ({ userId }) => {
       <div className="calendar-legend">
         <div className="legend-item">
           <div className="legend-color legend-owned"></div>
-          <span>Vlastné udalosti</span>
+          <span>VlastnÃ© udalosti</span>
         </div>
         <div className="legend-item">
           <div className="legend-color legend-shared"></div>
-          <span>Zdieľané udalosti</span>
+          <span>ZdieÄ¾anÃ© udalosti</span>
         </div>
         <div className="legend-item">
           <div className="legend-color legend-priority-HIGH"></div>
-          <span>Vysoká priorita</span>
+          <span>VysokÃ¡ priorita</span>
         </div>
         <div className="legend-item">
           <div className="legend-color legend-priority-MEDIUM"></div>
-          <span>Stredná priorita</span>
+          <span>StrednÃ¡ priorita</span>
         </div>
         <div className="legend-item">
           <div className="legend-color legend-priority-LOW"></div>
-          <span>Nízka priorita</span>
+          <span>NÃ­zka priorita</span>
         </div>
       </div>
     );
@@ -727,7 +726,7 @@ const Calendar = ({ userId }) => {
             checked={showOwnEvents}
             onChange={(e) => setShowOwnEvents(e.target.checked)}
           />
-          <label htmlFor="own-events">Vlastné udalosti</label>
+          <label htmlFor="own-events">VlastnÃ© udalosti</label>
         </div>
 
         <div className="filter-group">
@@ -738,7 +737,7 @@ const Calendar = ({ userId }) => {
             checked={showSharedEvents}
             onChange={(e) => setShowSharedEvents(e.target.checked)}
           />
-          <label htmlFor="shared-events">Zdieľané udalosti</label>
+          <label htmlFor="shared-events">ZdieÄ¾anÃ© udalosti</label>
         </div>
 
         <div className="filter-group">
@@ -749,7 +748,7 @@ const Calendar = ({ userId }) => {
             checked={showHighPriority}
             onChange={(e) => setShowHighPriority(e.target.checked)}
           />
-          <label htmlFor="high-priority">Vysoká priorita</label>
+          <label htmlFor="high-priority">VysokÃ¡ priorita</label>
         </div>
 
         <div className="filter-group">
@@ -760,7 +759,7 @@ const Calendar = ({ userId }) => {
             checked={showMediumPriority}
             onChange={(e) => setShowMediumPriority(e.target.checked)}
           />
-          <label htmlFor="medium-priority">Stredná priorita</label>
+          <label htmlFor="medium-priority">StrednÃ¡ priorita</label>
         </div>
 
         <div className="filter-group">
@@ -771,7 +770,7 @@ const Calendar = ({ userId }) => {
             checked={showLowPriority}
             onChange={(e) => setShowLowPriority(e.target.checked)}
           />
-          <label htmlFor="low-priority">Nízka priorita</label>
+          <label htmlFor="low-priority">NÃ­zka priorita</label>
         </div>
       </div>
     );
@@ -784,8 +783,8 @@ const Calendar = ({ userId }) => {
     <div className="calendar-container">
       {showUserIdWarning && (
         <div className="user-id-warning">
-          <strong>Upozornenie:</strong> Nie je k dispozícii ID používateľa. Pre správne fungovanie kalendára sa prihláste.
-          <button onClick={() => setShowUserIdWarning(false)} className="close-warning-btn">×</button>
+          <strong>Upozornenie:</strong> Nie je k dispozÃ­cii ID pouÅ¾Ã­vateÄ¾a. Pre sprÃ¡vne fungovanie kalendÃ¡ra sa prihlÃ¡ste.
+          <button onClick={() => setShowUserIdWarning(false)} className="close-warning-btn">Ã—</button>
         </div>
       )}
 
@@ -795,13 +794,13 @@ const Calendar = ({ userId }) => {
             className={currentView === 'day' ? 'active' : ''}
             onClick={() => setCurrentView('day')}
           >
-            Deň
+            DeÅˆ
           </button>
           <button
             className={currentView === 'week' ? 'active' : ''}
             onClick={() => setCurrentView('week')}
           >
-            Týždeň
+            TÃ½Å¾deÅˆ
           </button>
           <button
             className={currentView === 'month' ? 'active' : ''}
@@ -820,7 +819,7 @@ const Calendar = ({ userId }) => {
               <button onClick={goToToday}>Dnes</button>
               <button onClick={goToNextMonth}>&gt;</button>
             </div>
-            <button onClick={handleAddEvent} className="add-event-btn">+ Udalosť</button>
+            <button onClick={handleAddEvent} className="add-event-btn">+ UdalosÅ¥</button>
           </div>
         </div>
         
@@ -867,17 +866,17 @@ const Calendar = ({ userId }) => {
           {(isEventOwner(selectedEventForMenu) ||
             (selectedEventForMenu.userPermissions?.[numericUserId] === 'EDIT' ||
               selectedEventForMenu.userPermissions?.[numericUserId] === 'ADMIN')) && (
-              <button onClick={() => handleEditEvent(selectedEventForMenu)}>Upraviť</button>
+              <button onClick={() => handleEditEvent(selectedEventForMenu)}>UpraviÅ¥</button>
             )}
           {isEventOwner(selectedEventForMenu) && (
-            <button onClick={() => handleShareEvent(selectedEventForMenu)}>Zdieľať</button>
+            <button onClick={() => handleShareEvent(selectedEventForMenu)}>ZdieÄ¾aÅ¥</button>
           )}
           {(isEventOwner(selectedEventForMenu) ||
             selectedEventForMenu.userPermissions?.[numericUserId] === 'ADMIN') && (
-              <button onClick={() => handleDeleteEvent(selectedEventForMenu)}>Vymazať</button>
+              <button onClick={() => handleDeleteEvent(selectedEventForMenu)}>VymazaÅ¥</button>
             )}
           {!isEventOwner(selectedEventForMenu) && (
-            <button onClick={() => handleViewEventDetails(selectedEventForMenu)}>Zobraziť detaily</button>
+            <button onClick={() => handleViewEventDetails(selectedEventForMenu)}>ZobraziÅ¥ detaily</button>
           )}
         </div>
       )}

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import './EventForm.css';
 import { getPriorityColor } from './EventService';
 import { getAllUsers, searchUsers, findOrCreateUserByEmail } from './UserService';
+import ReminderSelector from './ReminderSelector';
 
 const EventForm = ({
   onSubmit,
@@ -40,6 +41,9 @@ const EventForm = ({
   // Permissions handling
   const [sharedUserPermissions, setSharedUserPermissions] = useState({});
 
+  // Reminder minutes (e.g., [15, 30, 60] for 15min, 30min, 1hour before event)
+  const [reminderMinutes, setReminderMinutes] = useState([15, 60]); // Default reminders
+
   // Check if user has edit permissions
   const hasEditPermission = () => {
     if (viewOnly) return false;
@@ -53,7 +57,21 @@ const EventForm = ({
     return permission === "EDIT" || permission === "ADMIN";
   };
 
+  // Check if user can modify sharing settings (only owner or ADMIN)
+  const canModifySharing = () => {
+    if (viewOnly) return false;
+    if (!event) return true; // New event
+
+    // Owner can always modify sharing
+    if (event.user && event.user.id === currentUserId) return true;
+
+    // Only ADMIN shared users can modify sharing (EDIT users cannot)
+    const permission = event.userPermissions?.[currentUserId] || "VIEW";
+    return permission === "ADMIN";
+  };
+
   const canEdit = hasEditPermission();
+  const canShare = canModifySharing();
 
   // Fetch all users for sharing
   useEffect(() => {
@@ -128,14 +146,14 @@ const EventForm = ({
     try {
       // Basic email validation
       if (!participantEmail || !participantEmail.includes('@') || !participantEmail.includes('.')) {
-        setEmailError('Zadajte platný email');
+        setEmailError('Zadajte platnÃ½ email');
         setAddingParticipant(false);
         return;
       }
 
       // Check if user already added
       if (sharedWithUsers.find(user => user.email === participantEmail)) {
-        setEmailError('Používateľ už bol pridaný');
+        setEmailError('PouÅ¾Ã­vateÄ¾ uÅ¾ bol pridanÃ½');
         setAddingParticipant(false);
         return;
       }
@@ -194,6 +212,13 @@ const EventForm = ({
         });
         setSharedUserPermissions(initialPermissions);
       }
+
+      // Load reminder minutes if available
+      if (event.reminderMinutes && Array.isArray(event.reminderMinutes)) {
+        setReminderMinutes(event.reminderMinutes);
+      } else {
+        setReminderMinutes([15, 60]); // Default reminders
+      }
     } else {
       // Create mode - initialize with selected date
       const defaultDate = formatDate(selectedDate);
@@ -219,6 +244,7 @@ const EventForm = ({
       setIsShared(false);
       setSharedWithUsers([]);
       setSharedUserPermissions({});
+      setReminderMinutes([15, 60]); // Default reminders for new events
     }
   }, [event, selectedDate]);
 
@@ -277,7 +303,9 @@ const EventForm = ({
       isShared,
       sharedWith: isShared ? sharedWithUsers : [],
       // Make sure permissions use user IDs as keys
-      userPermissions: isShared ? sharedUserPermissions : {}
+      userPermissions: isShared ? sharedUserPermissions : {},
+      // Include reminder minutes
+      reminderMinutes: reminderMinutes
     };
 
     onSubmit(eventData);
@@ -292,8 +320,8 @@ const EventForm = ({
   // Update form header
   const getFormTitle = () => {
     if (!canEdit && event) return 'Detaily udalosti';
-    if (event) return 'Upraviť udalosť';
-    return 'Nová udalosť';
+    if (event) return 'UpraviÅ¥ udalosÅ¥';
+    return 'NovÃ¡ udalosÅ¥';
   };
 
   // Render form buttons based on permissions
@@ -301,15 +329,15 @@ const EventForm = ({
     if (!canEdit) {
       return (
         <div className="form-buttons">
-          <button type="button" onClick={onCancel} className="cancel-btn">Zavrieť</button>
+          <button type="button" onClick={onCancel} className="cancel-btn">ZavrieÅ¥</button>
         </div>
       );
     }
 
     return (
       <div className="form-buttons">
-        <button type="button" onClick={onCancel} className="cancel-btn">Zrušiť</button>
-        <button type="submit" className="submit-btn">Uložiť</button>
+        <button type="button" onClick={onCancel} className="cancel-btn">ZruÅ¡iÅ¥</button>
+        <button type="submit" className="submit-btn">UloÅ¾iÅ¥</button>
       </div>
     );
   };
@@ -323,7 +351,7 @@ const EventForm = ({
 
       <form onSubmit={handleSubmit} className="event-form">
         <div className="form-group">
-          <label>Názov:</label>
+          <label>NÃ¡zov:</label>
           <input
             type="text"
             value={title}
@@ -363,12 +391,12 @@ const EventForm = ({
             onChange={(e) => setIsAllDay(e.target.checked)}
             disabled={!canEdit}
           />
-          <label htmlFor="allDay">Celý deň</label>
+          <label htmlFor="allDay">CelÃ½ deÅˆ</label>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Dátum začiatku:</label>
+            <label>DÃ¡tum zaÄiatku:</label>
             <input
               type="date"
               value={startDate}
@@ -381,7 +409,7 @@ const EventForm = ({
 
           {!isAllDay && (
             <div className="form-group">
-              <label>Čas začiatku:</label>
+              <label>ÄŒas zaÄiatku:</label>
               <input
                 type="time"
                 value={startTime}
@@ -396,7 +424,7 @@ const EventForm = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label>Dátum konca:</label>
+            <label>DÃ¡tum konca:</label>
             <input
               type="date"
               value={endDate}
@@ -409,7 +437,7 @@ const EventForm = ({
 
           {!isAllDay && (
             <div className="form-group">
-              <label>Čas konca:</label>
+              <label>ÄŒas konca:</label>
               <input
                 type="time"
                 value={endTime}
@@ -430,11 +458,11 @@ const EventForm = ({
             disabled={!canEdit}
             className={!canEdit ? "read-only-field" : ""}
           >
-            <option value="none">Žiadne</option>
+            <option value="none">Å½iadne</option>
             <option value="daily">Denne</option>
-            <option value="weekly">Týždenne</option>
-            <option value="monthly">Mesačne</option>
-            <option value="yearly">Ročne</option>
+            <option value="weekly">TÃ½Å¾denne</option>
+            <option value="monthly">MesaÄne</option>
+            <option value="yearly">RoÄne</option>
           </select>
         </div>
 
@@ -460,9 +488,9 @@ const EventForm = ({
             disabled={!canEdit}
             className={!canEdit ? "read-only-field" : ""}
           >
-            <option value="HIGH">Vysoká</option>
-            <option value="MEDIUM">Stredná</option>
-            <option value="LOW">Nízka</option>
+            <option value="HIGH">VysokÃ¡</option>
+            <option value="MEDIUM">StrednÃ¡</option>
+            <option value="LOW">NÃ­zka</option>
           </select>
         </div>
 
@@ -479,8 +507,15 @@ const EventForm = ({
           </div>
         </div>
 
+        {/* Reminder Selector - set notification times before event */}
+        <ReminderSelector
+          selectedReminders={reminderMinutes}
+          onChange={setReminderMinutes}
+          disabled={!canEdit}
+        />
+
         {/* Sharing options - only visible if user has edit rights */}
-        {canEdit && (
+        {canShare && (
           <div className="form-check">
             <input
               type="checkbox"
@@ -489,16 +524,16 @@ const EventForm = ({
               onChange={(e) => setIsShared(e.target.checked)}
               disabled={!canEdit}
             />
-            <label htmlFor="shared">Zdieľať s inými používateľmi</label>
+            <label htmlFor="shared">ZdieÄ¾aÅ¥ s inÃ½mi pouÅ¾Ã­vateÄ¾mi</label>
           </div>
         )}
 
         {/* Sharing section - editable version */}
-        {canEdit && isShared && (
+        {canShare && isShared && (
           <div className="sharing-section">
             {/* Email input for participants */}
             <div className="form-group">
-              <label>Pridať účastníka emailom:</label>
+              <label>PridaÅ¥ ÃºÄastnÃ­ka emailom:</label>
               <div className="email-input-container">
                 <input
                   type="email"
@@ -513,17 +548,17 @@ const EventForm = ({
                   onClick={addParticipantByEmail}
                   disabled={addingParticipant || !participantEmail}
                 >
-                  {addingParticipant ? 'Pridávam...' : 'Pridať'}
+                  {addingParticipant ? 'PridÃ¡vam...' : 'PridaÅ¥'}
                 </button>
               </div>
               {emailError && <div className="email-error">{emailError}</div>}
             </div>
 
             <div className="form-group">
-              <label>Zdieľané s používateľmi:</label>
+              <label>ZdieÄ¾anÃ© s pouÅ¾Ã­vateÄ¾mi:</label>
               <div className="shared-users-list">
                 {sharedWithUsers.length === 0 ? (
-                  <p className="no-users">Žiadni používatelia</p>
+                  <p className="no-users">Å½iadni pouÅ¾Ã­vatelia</p>
                 ) : (
                   <ul>
                     {sharedWithUsers.map(user => (
@@ -535,8 +570,8 @@ const EventForm = ({
                           className="permission-select"
                         >
                           <option value="VIEW">Zobrazenie</option>
-                          <option value="EDIT">Úpravy</option>
-                          <option value="ADMIN">Administrátor</option>
+                          <option value="EDIT">Ãšpravy</option>
+                          <option value="ADMIN">AdministrÃ¡tor</option>
                         </select>
                         <button
                           type="button"
@@ -556,21 +591,21 @@ const EventForm = ({
                 className="search-users-btn"
                 onClick={() => setShowUserSearch(!showUserSearch)}
               >
-                {showUserSearch ? 'Skryť vyhľadávanie' : 'Hľadať používateľov'}
+                {showUserSearch ? 'SkryÅ¥ vyhÄ¾adÃ¡vanie' : 'HÄ¾adaÅ¥ pouÅ¾Ã­vateÄ¾ov'}
               </button>
 
               {showUserSearch && (
                 <div className="user-search">
                   <input
                     type="text"
-                    placeholder="Vyhľadať používateľov..."
+                    placeholder="VyhÄ¾adaÅ¥ pouÅ¾Ã­vateÄ¾ov..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
 
                   <div className="search-results">
                     {availableUsers.length === 0 ? (
-                      <p className="no-results">Žiadni používatelia</p>
+                      <p className="no-results">Å½iadni pouÅ¾Ã­vatelia</p>
                     ) : (
                       <ul>
                         {availableUsers
@@ -595,9 +630,9 @@ const EventForm = ({
         )}
 
         {/* Sharing section - read-only version */}
-        {(!canEdit || !isShared) && event && event.isShared && (
+        {(!canShare && event && event.isShared) && (
           <div className="sharing-section read-only">
-            <h3>Zdieľané s používateľmi:</h3>
+            <h3>ZdieÄ¾anÃ© s pouÅ¾Ã­vateÄ¾mi:</h3>
             <div className="shared-users-list">
               {event.sharedWith?.length > 0 ? (
                 <ul>
@@ -611,7 +646,7 @@ const EventForm = ({
                   ))}
                 </ul>
               ) : (
-                <p className="no-users">Žiadni používatelia</p>
+                <p className="no-users">Å½iadni pouÅ¾Ã­vatelia</p>
               )}
             </div>
           </div>
