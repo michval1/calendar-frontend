@@ -12,7 +12,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
-  background-color: #476ca3;
+  background-color: #EBF5FB;
   color: #EBF5FB;
 }
 
@@ -60,19 +60,19 @@ html, body {
   border: solid blue;
   border-radius: 4px;
   font-size: 16px;
-  color: #ffffff;
+  color: #476ca3;
 }
-
+/*
 .form-group input, .form-group textarea, .form-group select {
     width: 100%;
     padding: 10px;
     border: 1px solid #535C91;
     border-radius: 4px;
-    color: #9290C3;
+    color: #476ca3;
 }
-
+*/
 .submit-btn {
-  background-color: #476ca3;
+  background-color: #4D88A7;
   color: white;
   padding: 12px;
   border: none;
@@ -83,18 +83,18 @@ html, body {
 }
 
 .submit-btn:hover {
-  background-color: #476ca3;
+  background-color: rgb(145, 192, 217);
 }
 
 .toggle-form {
   margin-top: 10px;
-  color: #476ca3;
+  color: #4D88A7;
 }
 
 .toggle-btn {
   background: none;
   border: none;
-  color: #476ca3;
+  color: #4D88A7;
   cursor: pointer;
   font-size: 16px;
   padding: 0 5px;
@@ -102,7 +102,7 @@ html, body {
 }
 
 .logout-btn {
-  background-color: #407089;
+  background-color: #4D88A7;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -112,7 +112,7 @@ html, body {
 }
 
 .logout-btn:hover {
-  background-color: #5BA0C5;
+  background-color: rgb(145, 192, 217);
   color: white;
   padding: 10px 20px;
   border: none;
@@ -175,4 +175,66 @@ html, body {
   justify-content: center;
   align-items: flex-start;
 }
-/* jfoowm */
+/*
+.form-group input,
+.form-group textarea,
+.form-group select {
+    background-color: #EBF5FB !important;
+    color: #476ca3 !important;
+}
+*/
+/* === LOGIN INPUT FIX – PRESNE PODĽA TVOJICH POŽIADAVIEK === */
+
+/* Farba textu Email: Heslo: už máš OK */
+
+/* Základný vzhľad inputov */
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    background-color: rgb(145, 192, 217);
+    border: none !important;      /* žiaden border */
+    border-radius: 4px;
+    color: #476ca3 !important;
+    font-size: 16px;
+    outline: none;
+}
+
+/* Pri kliknutí (focus) – zobraz border podľa požiadaviek */
+.form-group input:focus {
+    border: 0.5px solid #9CCDE2 !important;
+    background-color: rgb(160, 205, 230); /* jemný efekt, môžeš zmazať ak nechceš */
+}
+
+/* Zrušíme staré prepisovanie inputov */
+.form-group textarea,
+.form-group select {
+    background-color: rgb(145, 192, 217) !important;
+    border: none !important;
+    color: #476ca3 !important;
+}
+
+
+/* === LOGIN INPUT STYLING – FINAL WORKING VERSION === */
+
+/* Štýl labelov */
+.form-group label {
+    color: #476ca3;
+}
+
+/* Základný štýl inputov */
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    background-color: rgb(145, 192, 217); /* požadovaná farba */
+    border: none;                        /* bez hranice */
+    border-radius: 4px;
+    color: #476ca3;
+    font-size: 16px;
+    outline: none;
+}
+
+/* Len pri kliknutí (focus) */
+.form-group input:focus {
+    border: 0.5px solid #9CCDE2;         /* jemná modrá hranica */
+    background-color: rgb(175, 210, 233); /* mierne zvýraznenie (voliteľné) */
+}

@@ -51,7 +51,7 @@
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #9290C3;
+  color: #476ca3;
 }
 
 .form-group input,
@@ -61,8 +61,8 @@
   padding: 10px;
   border: 1px solid #535C91;
   border-radius: 4px;
-  background-color: #070F2B;
-  color: #9290C3;
+  background-color: rgb(145, 192, 217);
+  color: #476ca3;
 }
 
 .form-check {
@@ -111,7 +111,7 @@
 }
 
 .submit-btn {
-  background-color: #9290C3;
+  background-color: #4D88A7;
   color: #fff;
 }
 
