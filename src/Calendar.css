@@ -47,7 +47,7 @@
   padding-right: 10px;
 }
 
-.calendar-nav button, 
+.calendar-nav button,
 .view-selector button {
   background-color: #4D88A7;
   border: none;
@@ -58,7 +58,7 @@
   color: #fff;
 }
 
-.calendar-nav button:hover, 
+.calendar-nav button:hover,
 .view-selector button:hover {
   background-color: rgb(145, 192, 217);
 }
@@ -79,7 +79,7 @@
   color: white;
 }
 
-/* MesaÄnÃ½ pohÄ¾ad */
+/* Mesačný pohľad */
 .month-view {
   padding: 10px;
   border-radius: 50px;
@@ -138,20 +138,24 @@
   right: 5px;
 }
 
-/* TÃ½Å¾dennÃ½ pohÄ¾ad */
+/* Týždenný pohľad */
 .week-view {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   width: 100%;
   height: calc(100vh - 200px);
   min-height: 500px;
+  overflow-y: auto; /* jeden spoločný scroll */
+  background-color: #EBF5FB;
 }
 
 .week-day {
-  flex: 1;
   border: 0.5px solid #9CCDE2;
   display: flex;
   flex-direction: column;
-  background-color: #1B1A55;
+  background-color: #EBF5FB;
+  overflow-y: visible;
+  position: relative;
 }
 
 .day-header {
@@ -167,11 +171,75 @@
 
 .day-content {
   flex: 1;
-  padding: 10px;
+  padding: 0;
+  margin: 0;
   background-color: #EBF5FB;
+  display: flex;
+  flex-direction: column;
 }
 
-/* DennÃ½ pohÄ¾ad */
+/* Riadky hodín vo week view */
+.hour-row {
+  position: relative;
+  min-height: 50px;
+  border-bottom: 0.5px solid #9CCDE2;
+  padding-left: 45px; /* miesto pre text hodiny */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Label hodiny vo week view */
+.week-view .hour-label {
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  font-size: 12px;
+  color: #9290C3;      /* farba písma hodiny */
+  padding: 0;
+  border-right: none;
+  display: flex;
+  align-items: flex-start;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* Bunka pre eventy vo week view */
+.hour-cell {
+  position: relative;
+  padding: 3px;
+  flex: 1;
+  height: 100%;
+}
+
+/* Hover nad hodinou */
+.hour-row:hover {
+  background-color: #BCE4F0;
+  color: #fff;
+}
+
+/* Aktuálna hodina dňa */
+.current-hour {
+  background-color: #7CB7D4 !important;
+  font-weight: bold;
+  color: white !important;
+}
+
+/* Udalosti vo week view */
+.week-event {
+  margin-bottom: 4px;
+  padding: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.week-event:hover {
+  filter: brightness(110%);
+}
+
+/* Denný pohľad */
 .day-view {
   width: 100%;
   height: calc(100vh - 200px);
@@ -198,7 +266,8 @@
   border-bottom: 1.5px solid #9CCDE2;
 }
 
-.hour-label {
+/* Label hodiny v day view (odlíšený selektor) */
+.day-view .hour-label {
   width: 80px;
   padding: 5px;
   text-align: right;
@@ -213,18 +282,18 @@
   background-color: #EBF5FB;
 }
 
-/* ResponzÃ­vne prispÃ´sobenie */
+/* Responzívne prispôsobenie */
 @media (max-width: 768px) {
   .calendar-header {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .week-view {
-    flex-direction: column;
     height: auto;
+    min-height: 0;
   }
-  
+
   .week-day {
     min-height: 100px;
     border: 0.5px solid #9CCDE2;
@@ -261,18 +330,6 @@
   color: #9290C3;
   text-align: center;
   margin-top: 2px;
-}
-
-/* Event styles for week view */
-.week-event {
-  margin-bottom: 4px;
-  padding: 5px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.week-event:hover {
-  filter: brightness(110%);
 }
 
 .event-time {
@@ -345,12 +402,7 @@
   cursor: pointer;
 }
 
-/* Improve week and day views for events */
-.week-day {
-  overflow-y: auto;
-  position: relative;
-}
-
+/* Improve day view scroll */
 .day-hours {
   overflow-y: auto;
   max-height: calc(100vh - 253px);
@@ -437,7 +489,7 @@
 }
 
 .filter-group {
-  display: flex;
+  display: fine;
   align-items: center;
   gap: 5px;
 }
@@ -454,7 +506,8 @@
     align-items: flex-start;
   }
 }
-/* Add to your Calendar.css */
+
+/* User ID warning */
 .user-id-warning {
   background-color: #FFECB3;
   color: #FF6F00;
@@ -475,7 +528,6 @@
   cursor: pointer;
   padding: 0 0 0 15px;
 }
-/* Add to Calendar.css */
 
 /* Permission indicators */
 .event-dot.can-edit {
@@ -539,25 +591,6 @@
   font-size: 10px;
   line-height: 1;
 }
-/* Permission indicators */
-.event-dot.can-edit {
-  border-left: 3px solid #4CAF50; /* Green border for editable events */
-}
-
-.event-dot.view-only {
-  border-left: 3px solid #FFC107; /* Amber border for view-only events */
-}
-
-/* Add to legend */
-.calendar-legend .legend-item.legend-can-edit .legend-color {
-  background-color: #535C91;
-  border-left: 3px solid #4CAF50;
-}
-
-.calendar-legend .legend-item.legend-view-only .legend-color {
-  background-color: #535C91;
-  border-left: 3px solid #FFC107;
-}
 
 /* Permission selector styles */
 .permission-select {
@@ -568,4 +601,18 @@
   color: #9290C3;
   border: 1px solid #535C91;
   font-size: 0.8rem;
+}
+/* Highlight aktuálnej hodiny v day view */
+.current-hour-day {
+  background-color: #7CB7D4 !important;
+  font-weight: bold;
+  color: white !important;
+}
+
+.current-hour-day .hour-label {
+    color: white !important;
+}
+
+.current-hour-day:hover {
+  background-color: #7CB7D4 !important;
 }

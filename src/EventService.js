@@ -1,5 +1,5 @@
 // EventService.js
-const API_URL = "http://localhost:8080/api/v1/api/events";
+const API_URL = "http://localhost:8080/api/v1/events";
 
 export const getAllEvents = async (userId, startDate = null, endDate = null) => {
   try {

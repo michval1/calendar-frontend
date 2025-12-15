@@ -1,16 +1,16 @@
 /* EventForm.css */
 .event-form-container {
-  position: fixed;
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 90%;
   max-width: 500px;
-  background-color: #1B1A55;
+  background-color: #EBF5FB;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   z-index: 1000;
-  color: #9290C3;
+  color: #476ca3;
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -20,10 +20,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 1px solid #535C91;
+  /* border-bottom: 1px solid #EBF5FB; */
   position: sticky;
   top: 0;
-  background-color: #1B1A55;
+  background-color: #EBF5FB;
   z-index: 1;
 }
 
@@ -51,7 +51,13 @@
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #9290C3;
+  color: #476ca3;
+}
+
+.event-form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #476ca3;
 }
 
 .form-group input,
@@ -59,12 +65,21 @@
 .form-group select {
   width: 100%;
   padding: 10px;
-  border: 1px solid #535C91;
   border-radius: 4px;
-  background-color: #070F2B;
-  color: #9290C3;
+  background-color: white;
+  color: #476ca3;
 }
-
+/*
+.event-form-group input,
+.event-form-group textarea,
+.event-form-group select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: white;
+  color: #476ca3;
+}
+*/
 .form-check {
   display: flex;
   align-items: center;
@@ -88,30 +103,36 @@
 
 .form-buttons {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: center;
   gap: 10px;
   margin-top: 20px;
-  position: sticky;
+  /* position: sticky; */
   bottom: 0;
-  background-color: #1B1A55;
+  background-color: transparent;
   padding: 15px 0 0 0;
 }
 
-.cancel-btn,
-.submit-btn {
-  padding: 10px 15px;
+.event-cancel-btn,
+.event-submit-btn {
+  min-width: 140px;             
+  height: 44px;                 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.cancel-btn {
-  background-color: #535C91;
+.event-cancel-btn {
+  background-color: #80828b;
   color: #fff;
 }
 
-.submit-btn {
-  background-color: #9290C3;
+.event-submit-btn {
+  background-color: #4D88A7;
   color: #fff;
 }
 
@@ -153,9 +174,9 @@
 .sharing-section {
   margin-top: 20px;
   padding: 15px;
-  background-color: #070F2B;
+  background-color: #BCE4F0;
   border-radius: 8px;
-  border: 1px solid #535C91;
+  /*border: 1px solid #535C91; */
 }
 
 .shared-users-list {
@@ -163,9 +184,10 @@
   overflow-y: auto;
   margin-bottom: 15px;
   padding: 10px;
-  background-color: #1B1A55;
+  background-color: #32586C;
   border-radius: 4px;
-  border: 1px solid #535C91;
+  color:#9CCDE2 ;
+  /* border: 1px solid #535C91; */
 }
 
 .shared-users-list ul {
@@ -195,7 +217,7 @@
 }
 
 .search-users-btn {
-  background-color: #535C91;
+  background-color: #4D88A7;
   color: #fff;
   padding: 8px 12px;
   border: none;
@@ -237,13 +259,13 @@
 }
 
 .user-result:hover {
-  background-color: #9290C3;
+  background-color: rgb(145, 192, 217);
 }
 
 .no-users,
 .no-results {
   text-align: center;
-  color: #9290C3;
+  color: #9CCDE2;
   font-style: italic;
 }
 
@@ -279,7 +301,7 @@
 }
 
 .add-email-btn {
-  background-color: #535C91;
+  background-color: #4D88A7;
   color: #fff;
   padding: 8px 12px;
   border: none;
@@ -288,11 +310,11 @@
 }
 
 .add-email-btn:hover {
-  background-color: #9290C3;
+  background-color: rgb(145, 192, 217);
 }
 
 .add-email-btn:disabled {
-  background-color: #535C91;
+  background-color: #9CCDE2;
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -305,8 +327,8 @@
 }
 /* Read-only styles */
 .read-only-field {
-  background-color: #070F2B;
-  border-color: #535C91;
+  background-color: white;
+ /* border-color: #535C91;*/
   cursor: not-allowed;
   opacity: 0.9;
 }
@@ -336,4 +358,38 @@
   color: #9290C3;
   border: 1px solid #535C91;
   font-size: 0.8rem;
+}
+
+/* FORCE WHITE BACKGROUND FOR ALL FORM CONTROLS */
+.event-form-container input,
+.event-form-container textarea,
+.event-form-container select {
+  background-color: #ffffff !important;
+  color: #476ca3;
+  border: 1px solid #ccc;
+}
+
+/* REMOVE BROWSER DEFAULT STYLING */
+.event-form-container input[type="date"],
+.event-form-container input[type="time"],
+.event-form-container select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* FIX TIME PICKER SCROLL */
+input[type="time"],
+input[type="date"] {
+  position: relative;
+  z-index: 1001;
+}
+
+/* Allow wheel events inside modal */
+.event-form-container {
+  overscroll-behavior: contain;
+}
+/* Chrome time picker scroll fix */
+input[type="time"] {
+  -webkit-overflow-scrolling: touch;
 }

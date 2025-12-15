@@ -10,7 +10,16 @@
 /* Statistics Bar at Top (Horizontal) */
 .admin-stats-bar {
   display: flex;
+  flex-direction: column;
   gap: 20px;
+  /* flex-wrap: wrap; */
+}
+
+.flex-stat {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap:100px;
   flex-wrap: wrap;
 }
 
@@ -21,7 +30,7 @@
   align-items: center;
   gap: 20px;
   padding: 25px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #4D88A7;
   border-radius: 12px;
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -91,7 +100,7 @@
 /* Column Header */
 .column-header {
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background:#4D88A7;
   color: white;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
@@ -339,7 +348,7 @@
 
 .tables-header {
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #4D88A7;
   color: white;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
@@ -376,7 +385,7 @@
 }
 
 .admin-tabs button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #407089;
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }

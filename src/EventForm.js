@@ -146,14 +146,14 @@ const EventForm = ({
     try {
       // Basic email validation
       if (!participantEmail || !participantEmail.includes('@') || !participantEmail.includes('.')) {
-        setEmailError('Zadajte platnÃ½ email');
+        setEmailError('Zadajte platný email');
         setAddingParticipant(false);
         return;
       }
 
       // Check if user already added
       if (sharedWithUsers.find(user => user.email === participantEmail)) {
-        setEmailError('PouÅ¾Ã­vateÄ¾ uÅ¾ bol pridanÃ½');
+        setEmailError('Použivateľ už je pridaný');
         setAddingParticipant(false);
         return;
       }
@@ -315,23 +315,23 @@ const EventForm = ({
   // Update form header
   const getFormTitle = () => {
     if (!canEdit && event) return 'Detaily udalosti';
-    if (event) return 'UpraviÅ¥ udalosÅ¥';
-    return 'NovÃ¡ udalosÅ¥';
+    if (event) return 'Upraviť udalosť';
+    return 'Nová udalosť';
   };
 
   const renderFormButtons = () => {
     if (!canEdit) {
       return (
         <div className="form-buttons">
-          <button type="button" onClick={onCancel} className="cancel-btn">ZavrieÅ¥</button>
+          <button type="button" onClick={onCancel} className="cancel-btn">Zavrieť</button>
         </div>
       );
     }
 
     return (
       <div className="form-buttons">
-        <button type="button" onClick={onCancel} className="cancel-btn">ZruÅ¡iÅ¥</button>
-        <button type="submit" className="submit-btn">UloÅ¾iÅ¥</button>
+        <button type="button" onClick={onCancel} className="event-cancel-btn">Zrušiť</button>
+        <button type="submit" className="event-submit-btn">Uložiť</button>
       </div>
     );
   };
@@ -345,7 +345,7 @@ const EventForm = ({
 
       <form onSubmit={handleSubmit} className="event-form">
         <div className="form-group">
-          <label>NÃ¡zov:</label>
+          <label>Názov:</label>
           <input
             type="text"
             value={title}
@@ -385,12 +385,12 @@ const EventForm = ({
             onChange={(e) => setIsAllDay(e.target.checked)}
             disabled={!canEdit}
           />
-          <label htmlFor="allDay">CelÃ½ deÅˆ</label>
+          <label htmlFor="allDay">Celý deň</label>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>DÃ¡tum zaÄiatku:</label>
+            <label>Dátum začiatku:</label>
             <input
               type="date"
               value={startDate}
@@ -403,7 +403,7 @@ const EventForm = ({
 
           {!isAllDay && (
             <div className="form-group">
-              <label>ÄŒas zaÄiatku:</label>
+              <label>Čas začiatku:</label>
               <input
                 type="time"
                 value={startTime}
@@ -418,7 +418,7 @@ const EventForm = ({
 
         <div className="form-row">
           <div className="form-group">
-            <label>DÃ¡tum konca:</label>
+            <label>Dátum konca:</label>
             <input
               type="date"
               value={endDate}
@@ -431,7 +431,7 @@ const EventForm = ({
 
           {!isAllDay && (
             <div className="form-group">
-              <label>ÄŒas konca:</label>
+              <label>Čas konca:</label>
               <input
                 type="time"
                 value={endTime}
@@ -452,11 +452,11 @@ const EventForm = ({
             disabled={!canEdit}
             className={!canEdit ? "read-only-field" : ""}
           >
-            <option value="none">Å½iadne</option>
+            <option value="none">Žiadne</option>
             <option value="daily">Denne</option>
-            <option value="weekly">TÃ½Å¾denne</option>
-            <option value="monthly">MesaÄne</option>
-            <option value="yearly">RoÄne</option>
+            <option value="weekly">Týždenne</option>
+            <option value="monthly">Mesačne</option>
+            <option value="yearly">Ročne</option>
           </select>
         </div>
 
@@ -482,9 +482,9 @@ const EventForm = ({
             disabled={!canEdit}
             className={!canEdit ? "read-only-field" : ""}
           >
-            <option value="HIGH">VysokÃ¡</option>
-            <option value="MEDIUM">StrednÃ¡</option>
-            <option value="LOW">NÃ­zka</option>
+            <option value="HIGH">Vysoká</option>
+            <option value="MEDIUM">Stredná</option>
+            <option value="LOW">Nízka</option>
           </select>
         </div>
 
@@ -518,7 +518,7 @@ const EventForm = ({
               onChange={(e) => setIsShared(e.target.checked)}
               disabled={!canEdit}
             />
-            <label htmlFor="shared">ZdieÄ¾aÅ¥ s inÃ½mi pouÅ¾Ã­vateÄ¾mi</label>
+            <label htmlFor="shared">Zdielať s inými použivateľmi</label>
           </div>
         )}
 
@@ -527,7 +527,7 @@ const EventForm = ({
           <div className="sharing-section">
             {/* Email input for participants */}
             <div className="form-group">
-              <label>PridaÅ¥ ÃºÄastnÃ­ka emailom:</label>
+              <label>Pozvať účastníka e-mailom:</label>
               <div className="email-input-container">
                 <input
                   type="email"
@@ -542,17 +542,17 @@ const EventForm = ({
                   onClick={addParticipantByEmail}
                   disabled={addingParticipant || !participantEmail}
                 >
-                  {addingParticipant ? 'PridÃ¡vam...' : 'PridaÅ¥'}
+                  {addingParticipant ? 'Pridávam...' : 'Pridať'}
                 </button>
               </div>
               {emailError && <div className="email-error">{emailError}</div>}
             </div>
 
             <div className="form-group">
-              <label>ZdieÄ¾anÃ© s pouÅ¾Ã­vateÄ¾mi:</label>
+              <label>Zdieľať s používateľmi:</label>
               <div className="shared-users-list">
                 {sharedWithUsers.length === 0 ? (
-                  <p className="no-users">Å½iadni pouÅ¾Ã­vatelia</p>
+                  <p className="no-users">Žiadni použivatelia</p>
                 ) : (
                   <ul>
                     {sharedWithUsers.map(user => (
@@ -564,8 +564,8 @@ const EventForm = ({
                           className="permission-select"
                         >
                           <option value="VIEW">Zobrazenie</option>
-                          <option value="EDIT">Ãšpravy</option>
-                          <option value="ADMIN">AdministrÃ¡tor</option>
+                          <option value="EDIT">Úpravy</option>
+                          <option value="ADMIN">Administrátor</option>
                         </select>
                         <button
                           type="button"
@@ -585,21 +585,21 @@ const EventForm = ({
                 className="search-users-btn"
                 onClick={() => setShowUserSearch(!showUserSearch)}
               >
-                {showUserSearch ? 'SkryÅ¥ vyhÄ¾adÃ¡vanie' : 'HÄ¾adaÅ¥ pouÅ¾Ã­vateÄ¾ov'}
+                {showUserSearch ? 'Skryť vyhľadávanie' : 'Hľadať používateľov'}
               </button>
 
               {showUserSearch && (
                 <div className="user-search">
                   <input
                     type="text"
-                    placeholder="VyhÄ¾adaÅ¥ pouÅ¾Ã­vateÄ¾ov..."
+                    placeholder="Vyhľadať používateľov..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
 
                   <div className="search-results">
                     {availableUsers.length === 0 ? (
-                      <p className="no-results">Å½iadni pouÅ¾Ã­vatelia</p>
+                      <p className="no-results">Žiadni používatelia</p>
                     ) : (
                       <ul>
                         {availableUsers
@@ -626,7 +626,7 @@ const EventForm = ({
         {/* Sharing section - read-only version */}
         {(!canShare && event && event.isShared) && (
           <div className="sharing-section read-only">
-            <h3>ZdieÄ¾anÃ© s pouÅ¾Ã­vateÄ¾mi:</h3>
+            <h3>Zdieľané s používateľmi:</h3>
             <div className="shared-users-list">
               {event.sharedWith?.length > 0 ? (
                 <ul>
@@ -640,7 +640,7 @@ const EventForm = ({
                   ))}
                 </ul>
               ) : (
-                <p className="no-users">Å½iadni pouÅ¾Ã­vatelia</p>
+                <p className="no-users">Žiadni používatelia</p>
               )}
             </div>
           </div>

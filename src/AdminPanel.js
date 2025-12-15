@@ -420,6 +420,7 @@ const AdminPanel = ({ userId }) => {
   return (
     <div className="admin-panel-wrapper">
       {/* Statistics Bar at Top */}
+      <div className="flex-stat">
       <div className="admin-stats-bar">
         <div className="stat-card">
           <div className="stat-icon">👥</div>
@@ -623,6 +624,7 @@ const AdminPanel = ({ userId }) => {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Bottom Section: Tabbed Tables View */}
