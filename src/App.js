@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { auth, loginWithEmailAndPassword, registerWithEmailAndPassword, logoutUser, getUserId } from './firebase';
+import {
+  auth,
+  loginWithEmailAndPassword,
+  registerWithEmailAndPassword,
+  logoutUser
+} from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Calendar from './Calendar';
 import NotificationCenter from './NotificationCenter';
@@ -17,104 +22,77 @@ function App() {
   const [userId, setUserId] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check if user is admin
+  // ===== ADMIN CHECK =====
   const checkIfAdmin = (userEmail) => {
     return userEmail === 'admin@admin.admin';
   };
 
-  // Sledovať stav autentifikácie
+  // ===== AUTH STATE =====
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("Auth state changed:", currentUser);
       setUser(currentUser);
-      
-      // Check if user is admin
+
       if (currentUser) {
         setIsAdmin(checkIfAdmin(currentUser.email));
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
       } else {
         setIsAdmin(false);
+        setUserId(null);
       }
-      
-      // Get userId directly from localStorage
-      const storedUserId = localStorage.getItem('userId');
-      console.log("User ID from localStorage:", storedUserId);
-      setUserId(storedUserId);
-      
+
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Pri načítaní komponenty - odoslanie ID používateľa na server
+  // ===== DYNAMIC TAB TITLE =====
   useEffect(() => {
-    // Kontrola, či je používateľ prihlásený
-    if (user) {
-      const localUserId = localStorage.getItem('userId');
-      if (localUserId) {
-        // Set userId state
-        setUserId(localUserId);
-        // Odoslanie ID na server
-        sendUserIdToServer(localUserId);
-      } else {
-        console.error("User is logged in but userId is not in localStorage");
-      }
+    if (!user) {
+      document.title = isLogin ? 'Prihlásenie' : 'Registrácia';
+    } else if (isAdmin) {
+      document.title = 'Admin panel';
+    } else {
+      document.title = 'Osobný kalendár';
     }
-  }, [user]);
+  }, [user, isAdmin, isLogin]);
 
-  // Funkcia na odoslanie ID používateľa na server
+  // ===== SEND USER ID TO SERVER =====
+  useEffect(() => {
+    if (user && userId) {
+      sendUserIdToServer(userId);
+    }
+  }, [user, userId]);
+
   const sendUserIdToServer = async (userId) => {
     try {
-      console.log("Sending userId to server:", userId);
-      const response = await fetch('http://localhost:8080/api/v1/api/users/active', {
+      await fetch('http://localhost:8080/api/v1/api/users/active', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: userId })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
       });
-
-      if (!response.ok) {
-        console.error('Chyba pri odoslaní ID na server:', response.status);
-      } else {
-        console.log('ID používateľa úspešne odoslané na server');
-      }
     } catch (error) {
-      console.error('Chyba pri komunikácii so serverom:', error);
+      console.error('Chyba pri odoslaní ID na server:', error);
     }
   };
 
+  // ===== LOGIN / REGISTER =====
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    
+
     try {
-      if (isLogin) {
-        // Prihlásenie
-        const result = await loginWithEmailAndPassword(email, password);
-        if (result.error) {
-          setError(result.error);
-        } else if (result.user) {
-          // Check if admin
-          setIsAdmin(checkIfAdmin(result.user.email));
-          // Get userId directly after login
-          const localUserId = localStorage.getItem('userId');
-          console.log("After login, userId from localStorage:", localUserId);
-          setUserId(localUserId);
-        }
-      } else {
-        // Registrácia s menom používateľa
-        const result = await registerWithEmailAndPassword(email, password, username);
-        if (result.error) {
-          setError(result.error);
-        } else if (result.user) {
-          // Check if admin
-          setIsAdmin(checkIfAdmin(result.user.email));
-          // Get userId directly after registration
-          const localUserId = localStorage.getItem('userId');
-          console.log("After registration, userId from localStorage:", localUserId);
-          setUserId(localUserId);
-        }
+      const result = isLogin
+        ? await loginWithEmailAndPassword(email, password)
+        : await registerWithEmailAndPassword(email, password, username);
+
+      if (result.error) {
+        setError(result.error);
+      } else if (result.user) {
+        setIsAdmin(checkIfAdmin(result.user.email));
+        const localUserId = localStorage.getItem('userId');
+        setUserId(localUserId);
       }
     } catch (err) {
       setError(err.message);
@@ -122,16 +100,13 @@ function App() {
   };
 
   const handleLogout = async () => {
-    const result = await logoutUser();
-    if (result.error) {
-      setError(result.error);
-    } else {
-      // Clear userId on logout
-      setUserId(null);
-      setIsAdmin(false);
-    }
+    await logoutUser();
+    setUser(null);
+    setUserId(null);
+    setIsAdmin(false);
   };
 
+  // ===== LOADING =====
   if (loading) {
     return (
       <div className="App">
@@ -142,94 +117,93 @@ function App() {
     );
   }
 
+  // ===== LOGGED USER =====
   if (user) {
     return (
       <div className="App">
-        {/* Notification Center - shows notifications and test button (only for non-admin) */}
         {!isAdmin && userId && <NotificationCenter userId={userId} />}
-        
+
         <div className="app-container">
           <nav className="app-nav">
             <div className="user-info">
-              <h3>{isAdmin ? 'Admin Panel' : 'Osobný kalendár'}</h3>
+              <h3>{isAdmin ? 'Admin panel' : 'Osobný kalendár'}</h3>
               <p>{user.displayName || user.email}</p>
               <p>ID: {userId}</p>
-              {isAdmin && <p style={{color: '#FF5252', fontWeight: 'bold'}}>👑 Administrator</p>}
+              {isAdmin && (
+                <p style={{ color: '#FF5252', fontWeight: 'bold' }}>
+                  👑 Administrátor
+                </p>
+              )}
             </div>
-            <button onClick={handleLogout} className="logout-btn">Odhlásiť sa</button>
+
+            <button onClick={handleLogout} className="logout-btn">
+              Odhlásiť sa
+            </button>
           </nav>
-          
+
           <main className="app-content">
-            {/* Show AdminPanel for admin, Calendar for regular users */}
             {isAdmin ? (
               <AdminPanel userId={userId} />
             ) : (
               <Calendar userId={userId} />
             )}
           </main>
-          
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
+
+          {error && <div className="error-message">{error}</div>}
         </div>
       </div>
     );
   }
 
+  // ===== LOGIN / REGISTER SCREEN =====
   return (
     <div className="App">
       <header className="App-header">
         <h1>{isLogin ? 'Prihlásenie' : 'Registrácia'}</h1>
-        
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
-        
+
+        {error && <div className="error-message">{error}</div>}
+
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email:</label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
-          
+
           <div className="form-group">
             <label>Heslo:</label>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
-          
+
           {!isLogin && (
             <div className="form-group">
               <label>Používateľské meno:</label>
-              <input 
-                type="text" 
-                value={username} 
-                onChange={(e) => setUsername(e.target.value)} 
-                required={!isLogin}
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
               />
             </div>
           )}
-          
+
           <button type="submit" className="submit-btn">
             {isLogin ? 'Prihlásiť' : 'Registrovať'}
           </button>
         </form>
-        
+
         <p className="toggle-form">
-          {isLogin ? 'Nemáte účet?' : 'Už máte účet?'} 
-          <button 
+          {isLogin ? 'Nemáte účet?' : 'Už máte účet?'}
+          <button
             onClick={() => setIsLogin(!isLogin)}
             className="toggle-btn"
           >
